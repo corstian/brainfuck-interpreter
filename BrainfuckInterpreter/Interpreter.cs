@@ -2,6 +2,8 @@ namespace BrainfuckInterpreter;
 
 public class Interpreter(string Program)
 {
+    public int OperationCount { get; private set; } = 0;
+    
     public int ProgramPointer { get; private set; } = 0;
 
     public int DataPointer { get; private set; }
@@ -35,18 +37,49 @@ public class Interpreter(string Program)
                 break;
             case '[':
                 if (Data[DataPointer] == 0)
-                    while (Program[ProgramPointer] != ']' && ProgramPointer + 1 < Program.Length) ProgramPointer++;
+                {
+                    // Seek forward
+                    var balance = 1;
+
+                    char c;
+                    
+                    while (balance > 0 && ProgramPointer + 1 < Program.Length)
+                    {
+                        ProgramPointer++;
+                        
+                        c = Program[ProgramPointer];
+
+                        if (c == '[') balance++;
+                        if (c == ']') balance--;
+                    }
+                }
+
                 break;
             case ']':
                 if (Data[DataPointer] != 0)
-                    while (Program[ProgramPointer] != '[' && ProgramPointer >= 0)
+                {
+                    var balance = 1;
+                    char c;
+                    while (balance > 0
+                           && ProgramPointer > 0)
+                    {
                         ProgramPointer--;
+
+                        c = Program[ProgramPointer];
+
+                        if (c == ']') balance++;
+                        if (c == '[') balance--;
+                    }
+                }
+
                 break;
             default:
-                throw new NotImplementedException();
+                // throw new NotImplementedException();
+                break;
         }
 
         ProgramPointer++;
+        OperationCount++;
     }
 
     public void Input(byte input)
