@@ -76,7 +76,7 @@ public class InterpreterTests
     }
 
     [Fact]
-    public void StartsLoop()
+    public void TrySkipLoop()
     {
         var interpreter = new Interpreter("[");
 
@@ -86,14 +86,52 @@ public class InterpreterTests
     }
 
     [Fact]
-    public void EndsLoop()
+    public void TryStartLoop()
     {
-        var interpreter = new Interpreter("[>]");
+        var interpreter = new Interpreter("+[");
+
+        interpreter.Run();
+        
+        Assert.Equal(2, interpreter.ProgramPointer);
+    }
+
+    [Fact]
+    public void TryEndLoop()
+    {
+        var interpreter = new Interpreter("]");
+
+        interpreter.Run();
+        Assert.Equal(1, interpreter.ProgramPointer);
+    }
+
+    [Fact]
+    public void SkipsLoopIfDataAtPointerIsZero()
+    {
+        var interpreter = new Interpreter("[]");
 
         interpreter.Step();
+        
+        Assert.Equal(2, interpreter.ProgramPointer);
+    }
+
+    [Fact]
+    public void GoesIntoLoopIfDataAtPointerIsNonZero()
+    {
+        var interpreter = new Interpreter("+[]");
+        
         interpreter.Step();
         interpreter.Step();
         
-        Assert.Equal(1, interpreter.ProgramPointer);
+        Assert.Equal(2, interpreter.ProgramPointer);
+    }
+
+    [Fact]
+    public void EndsLoop()
+    {
+        var interpreter = new Interpreter("+[-]");
+
+        interpreter.Run();
+        
+        Assert.Equal(4, interpreter.ProgramPointer);
     }
 }

@@ -11,11 +11,12 @@ public class Interpreter(string Program)
     
     public void Step()
     {
+        if (ProgramPointer >= Program.Length) return;
+        
         switch (Program[ProgramPointer])
         {
             case '>':
                 DataPointer++;
-                
                 break;
             case '<':
                 DataPointer--;
@@ -33,11 +34,13 @@ public class Interpreter(string Program)
                 Data[DataPointer] = InputBuffer.Dequeue();
                 break;
             case '[':
-                // no-op for now, just continue into loop
+                if (Data[DataPointer] == 0)
+                    while (Program[ProgramPointer] != ']' && ProgramPointer + 1 < Program.Length) ProgramPointer++;
                 break;
             case ']':
-                while (Program[ProgramPointer] != '[')
-                    ProgramPointer--;
+                if (Data[DataPointer] != 0)
+                    while (Program[ProgramPointer] != '[' && ProgramPointer >= 0)
+                        ProgramPointer--;
                 break;
             default:
                 throw new NotImplementedException();
@@ -49,5 +52,13 @@ public class Interpreter(string Program)
     public void Input(byte input)
     {
         InputBuffer.Enqueue(input);
+    }
+
+    public void Run()
+    {
+        while (ProgramPointer < Program.Length)
+        {
+            Step();
+        }
     }
 }
