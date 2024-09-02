@@ -11,17 +11,19 @@ public class Interpreter(string Program)
     public List<byte> Output { get; private set; } = new();
     public Queue<byte> InputBuffer { get; set; } = new();
     
-    public void Step()
+    public bool Step()
     {
-        if (ProgramPointer >= Program.Length) return;
+        if (ProgramPointer >= Program.Length) return false;
         
         switch (Program[ProgramPointer])
         {
             case '>':
-                DataPointer++;
+                if (DataPointer < Data.Length)
+                    DataPointer++;
                 break;
             case '<':
-                DataPointer--;
+                if (DataPointer > 0)
+                    DataPointer--;
                 break;
             case '+':
                 Data[DataPointer]++;
@@ -33,7 +35,8 @@ public class Interpreter(string Program)
                 Output.Add(Data[DataPointer]);
                 break;
             case ',':
-                Data[DataPointer] = InputBuffer.Dequeue();
+                if (InputBuffer.TryDequeue(out var b))
+                    Data[DataPointer] = b;
                 break;
             case '[':
                 if (Data[DataPointer] == 0)
@@ -80,6 +83,8 @@ public class Interpreter(string Program)
 
         ProgramPointer++;
         OperationCount++;
+
+        return true;
     }
 
     public void Input(byte input)
@@ -89,9 +94,6 @@ public class Interpreter(string Program)
 
     public void Run()
     {
-        while (ProgramPointer < Program.Length)
-        {
-            Step();
-        }
+        while (Step()) { }
     }
 }

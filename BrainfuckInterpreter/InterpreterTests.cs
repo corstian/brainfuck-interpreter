@@ -30,7 +30,7 @@ public class InterpreterTests
 
         interpreter.Step();
 
-        Assert.Equal(-1, interpreter.DataPointer);
+        Assert.Equal(0, interpreter.DataPointer);
     }
 
     [Fact]
