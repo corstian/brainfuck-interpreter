@@ -1,19 +1,10 @@
 using System.Numerics;
-using System.Text;
-using Xunit.Abstractions;
 
-namespace BrainfuckInterpreter;
+namespace BrainfuckInterpreter.Tests;
 
-public class RandomTests
+public abstract class LfsrBase
 {
-    private readonly ITestOutputHelper _output;
-
-    public RandomTests(ITestOutputHelper output)
-    {
-        _output = output;
-    }
-    
-    private readonly byte[] seed =
+    public readonly byte[] Seed =
     [
         0, 160, 167, 0, 0, 0, 0, 0, 17, 96, 210, 9, 0, 160, 167, 0, 16, 161, 83, 147, 17, 192, 164, 19, 1, 112, 230,
         161, 23, 226, 250, 185, 32, 144, 128, 124, 99, 175, 153, 135, 241, 113, 136, 75, 244, 214, 129, 110, 48, 173,
@@ -38,36 +29,7 @@ public class RandomTests
         191, 79, 23, 179, 141, 95, 240, 206, 55, 172, 142, 242, 12, 233, 33, 32, 69, 23, 76, 5, 250, 83
     ];
     
-    [Fact]
-    public void RunRandomTest()
-    {
-        var interpreter = new Interpreter(Encoding.ASCII.GetString(seed));
-        
-        interpreter.Run();
-    }
-    
-    [Fact]
-    public void KeepRunningRandomTest()
-    {
-        var numeric = GetNumbers(seed);
-        
-        // Warning: the 6th iteration contains a failure condition. Program doesn't terminate?
-        for (int i = 0; i < 5; i++)
-        {
-            numeric = ComputeLater(numeric);
-
-            var interpreter = new Interpreter(Encoding
-                .ASCII
-                .GetString(
-                    GetBytes(numeric)));
-
-            interpreter.Run();
-
-            _output.WriteLine($"{interpreter.OperationCount}\t{interpreter.ProgramPointer}");
-        }
-    }
-
-    private ulong ConstantAt(int i)
+    public ulong ConstantAt(int i)
     {
         BigInteger Odd(int x) => 512 * BigInteger.Pow(15, x);
         BigInteger Even(int x) => Odd(x) / 15 * x;
@@ -75,7 +37,7 @@ public class RandomTests
         return (ulong)((Odd(i) + (Even(i) * BigInteger.Pow(2, 32))) % BigInteger.Pow(2, 64));
     }
 
-    private ulong[] GetNumbers(byte[] bytes)
+    public ulong[] GetNumbers(byte[] bytes)
     {
         var results = new ulong[bytes.Length / 8];
         
@@ -87,7 +49,7 @@ public class RandomTests
         return results;
     }
 
-    private ulong[] ComputeLater(ulong[] numbers)
+    public ulong[] ComputeLater(ulong[] numbers)
     {
         for (var i = 0; i < numbers.Length; i++)
         {
@@ -96,8 +58,18 @@ public class RandomTests
 
         return numbers;
     }
+    
+    public ulong[] ComputePrevious(ulong[] numbers)
+    {
+        for (var i = 0; i < numbers.Length; i++)
+        {
+            numbers[i] -= ConstantAt(i);
+        }
 
-    private byte[] GetBytes(ulong[] numbers)
+        return numbers;
+    }
+
+    public byte[] GetBytes(ulong[] numbers)
     {
         var buffer = new byte[512];
 

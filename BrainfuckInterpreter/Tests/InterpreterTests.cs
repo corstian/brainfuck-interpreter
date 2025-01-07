@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace BrainfuckInterpreter;
+namespace BrainfuckInterpreter.Tests;
 
 public class InterpreterTests
 {
@@ -198,7 +198,7 @@ public class InterpreterTests
                       """;
         
         var interpreter = new Interpreter(program);
-    
+        
         interpreter.Run();
         
         Assert.Equal("Hello World!\n", Encoding.ASCII.GetString(interpreter.Output.ToArray()));
